@@ -1,9 +1,9 @@
 [package]
 name = "batadase-index"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/GRDigital/batadase"
+repository = "https://github.com/zygomedia/batadase"
 description = "batadase is an incredible LMDB wrapper"
 authors = ["Zygo Media <contact@zygomedia.com>"]
 readme = "../README.md"

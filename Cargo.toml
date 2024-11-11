@@ -1,9 +1,9 @@
 [package]
 name = "batadase"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/GRDigital/batadase"
+repository = "https://github.com/zygomedia/batadase"
 description = "batadase is an incredible LMDB wrapper"
 authors = ["Zygo Media <contact@zygomedia.com>"]
 readme = "README.md"
@@ -17,7 +17,7 @@ libc = "0.2"
 lmdb-sys = { version = "0.11", package = "lmdb-sys2" }
 log = "0.4"
 rkyv = { version = "0.8", features = ["bytecheck", "unaligned", "alloc"], default-features = false }
-thiserror = "1"
+thiserror = "2"
 tokio = { version = "1", features = ["sync", "rt"], default-features = false }
 
 # [patch.crates-io]

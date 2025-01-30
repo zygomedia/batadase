@@ -219,6 +219,6 @@ pub trait MdbValExt {
 
 impl MdbValExt for lmdb_sys::MDB_val {
 	unsafe fn as_slice(&self) -> &[u8] {
-		std::slice::from_raw_parts(self.mv_data.cast::<u8>(), self.mv_size)
+		unsafe { std::slice::from_raw_parts(self.mv_data.cast::<u8>(), self.mv_size) }
 	}
 }

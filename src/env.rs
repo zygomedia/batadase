@@ -53,7 +53,7 @@ impl Env {
 
 	pub fn reader_list(&self) {
 		unsafe extern "C" fn msg(msg: *const libc::c_char, _: *mut libc::c_void) -> i32 {
-			let cstr = std::ffi::CStr::from_ptr(msg);
+			let cstr = unsafe { std::ffi::CStr::from_ptr(msg) };
 			println!("{}", cstr.to_string_lossy());
 			0
 		}

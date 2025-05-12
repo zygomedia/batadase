@@ -1,5 +1,6 @@
 use crate::{Transaction, RwTxn, Table, RkyvSer, RkyvVal, Error, lmdb, DbFlags};
 use culpa::throws;
+use enumflags2::BitFlag;
 use batadase_index::Index;
 
 pub struct IndexPolyTable<'tx, TX> {
@@ -25,7 +26,16 @@ impl<'tx> IndexPolyTable<'tx, RwTxn<'tx>> {
 	{
 		let mut index_bytes = u64::from(index).to_ne_bytes();
 		let mut value_bytes = rkyv::to_bytes(t)?;
-		lmdb::put(self.tx, self.dbi, &mut index_bytes, &mut value_bytes)?;
+		lmdb::put(self.tx, self.dbi, &mut index_bytes, &mut value_bytes, lmdb::PutFlags::empty())?;
+	}
+
+	#[throws]
+	pub fn put_no_overwrite<T>(&self, index: Index<T>, t: &T) where
+		T: rkyv::Archive + for <'a> rkyv::Serialize<RkyvSer<'a>>,
+	{
+		let mut index_bytes = u64::from(index).to_ne_bytes();
+		let mut value_bytes = rkyv::to_bytes(t)?;
+		lmdb::put(self.tx, self.dbi, &mut index_bytes, &mut value_bytes, lmdb::PutFlags::NoOverwrite.into())?;
 	}
 
 	#[throws]

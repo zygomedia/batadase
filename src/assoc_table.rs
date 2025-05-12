@@ -1,5 +1,6 @@
 use crate::{Transaction, RwTxn, Table, RkyvSer, RkyvVal, RkyvDe, Error, lmdb};
 use culpa::throws;
+use enumflags2::BitFlag;
 use std::marker::PhantomData;
 
 pub struct AssocTable<'tx, TX, K, V> {
@@ -64,7 +65,14 @@ impl<'tx, K, V> AssocTable<'tx, RwTxn<'tx>, K, V> where
 	pub fn put(&self, key: &K, value: &V) {
 		let mut key_bytes = rkyv::to_bytes(key)?;
 		let mut value_bytes = rkyv::to_bytes(value)?;
-		lmdb::put(self.tx, self.dbi, &mut key_bytes, &mut value_bytes)?;
+		lmdb::put(self.tx, self.dbi, &mut key_bytes, &mut value_bytes, lmdb::PutFlags::empty())?;
+	}
+
+	#[throws]
+	pub fn put_no_overwrite(&self, key: &K, value: &V) {
+		let mut key_bytes = rkyv::to_bytes(key)?;
+		let mut value_bytes = rkyv::to_bytes(value)?;
+		lmdb::put(self.tx, self.dbi, &mut key_bytes, &mut value_bytes, lmdb::PutFlags::NoOverwrite.into())?;
 	}
 
 	#[throws]

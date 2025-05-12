@@ -1,5 +1,6 @@
 use crate::{Transaction, RwTxn, Table, RkyvSer, RkyvVal, RkyvDe, Error, lmdb};
 use culpa::throws;
+use enumflags2::BitFlag;
 use std::marker::PhantomData;
 
 pub struct AssocPolyTable<'tx, TX, K> {
@@ -30,7 +31,16 @@ impl<'tx, K> AssocPolyTable<'tx, RwTxn<'tx>, K> where
 	{
 		let mut key_bytes = rkyv::to_bytes(key)?;
 		let mut value_bytes = rkyv::to_bytes(value)?;
-		lmdb::put(self.tx, self.dbi, &mut key_bytes, &mut value_bytes)?;
+		lmdb::put(self.tx, self.dbi, &mut key_bytes, &mut value_bytes, lmdb::PutFlags::empty())?;
+	}
+
+	#[throws]
+	pub fn put_no_overwrite<V>(&self, key: &K, value: &V) where
+		V: rkyv::Archive + for <'a> rkyv::Serialize<RkyvSer<'a>>,
+	{
+		let mut key_bytes = rkyv::to_bytes(key)?;
+		let mut value_bytes = rkyv::to_bytes(value)?;
+		lmdb::put(self.tx, self.dbi, &mut key_bytes, &mut value_bytes, lmdb::PutFlags::NoOverwrite.into())?;
 	}
 
 	#[throws]

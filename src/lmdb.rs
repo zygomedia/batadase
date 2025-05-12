@@ -52,6 +52,17 @@ pub enum CursorOpFlags {
 		GetBothRange = sys::MDB_GET_BOTH_RANGE, // position at key, nearest data
 }
 
+#[enumflags2::bitflags]
+#[repr(u32)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PutFlags {
+	NoDupData = sys::MDB_NODUPDATA, // ONLY for DbFlags::DupSort, do not enter duplicate data
+	NoOverwrite = sys::MDB_NOOVERWRITE, // do not enter duplicate data or overwrite existing data, in case of Error::KeyExists - the data parameter will point to existing item
+	Reserve = sys::MDB_RESERVE, // reserve space but do not write the data, caller expected to fill in the data before transaction ends
+	Append = sys::MDB_APPEND, // append key/data to end of the database, allows fast bulk loading of keys in known sorted order, loading unsorted will cause Error::KeyExists
+	AppendDup = sys::MDB_APPENDDUP, // as above, but for sorted dup data
+}
+
 #[repr(transparent)]
 struct Val<'a>(sys::MDB_val, std::marker::PhantomData<&'a ()>);
 
@@ -136,8 +147,8 @@ impl<TX> Drop for Cursor<'_, TX> {
 }
 
 #[throws]
-pub(super) fn put(tx: &RwTxn, dbi: sys::MDB_dbi, key: impl AsMut<[u8]>, val: impl AsMut<[u8]>) {
-	error::handle_put_code(unsafe { sys::mdb_put(tx.raw(), dbi, &mut *Val::from_buf(key), &mut *Val::from_buf(val), 0) })?;
+pub(super) fn put(tx: &RwTxn, dbi: sys::MDB_dbi, key: impl AsMut<[u8]>, val: impl AsMut<[u8]>, flags: enumflags2::BitFlags<PutFlags>) {
+	error::handle_put_code(unsafe { sys::mdb_put(tx.raw(), dbi, &mut *Val::from_buf(key), &mut *Val::from_buf(val), flags.bits()) })?;
 }
 
 #[throws]

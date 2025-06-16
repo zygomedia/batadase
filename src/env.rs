@@ -62,14 +62,14 @@ impl Env {
 
 	// ????? rustc lint engine?
 	#[expect(unused_braces)]
-	#[throws] pub fn read_tx(&self) -> RoTxn { RoTxn { raw: lmdb::txn_begin(self.raw_env, lmdb_sys::MDB_RDONLY)?, env: self } }
+	#[throws] pub fn read_tx(&self) -> RoTxn<'_> { RoTxn { raw: lmdb::txn_begin(self.raw_env, lmdb_sys::MDB_RDONLY)?, env: self } }
 	#[expect(unused_braces)]
-	#[throws] pub(super) fn write_tx(&self) -> RwTxn { RwTxn { raw: lmdb::txn_begin(self.raw_env, 0)?, env: self } }
+	#[throws] pub(super) fn write_tx(&self) -> RwTxn<'_> { RwTxn { raw: lmdb::txn_begin(self.raw_env, 0)?, env: self } }
 
 	#[throws]
 	pub async fn write<Res, Job>(&'static self, job: Job) -> Res where
 		Res: Send + 'static,
-		Job: (FnOnce(&RwTxn) -> Res) + Send + 'static,
+		Job: (FnOnce(&RwTxn<'_>) -> Res) + Send + 'static,
 	{
 		let _lock = self.write_sema.acquire().await.unwrap();
 		let now = std::time::Instant::now();
@@ -91,7 +91,7 @@ impl Env {
 	#[throws]
 	pub async fn try_write<Res, Err, Job>(&'static self, job: Job) -> Result<Res, Err> where
 		Res: Send + 'static,
-		Job: (FnOnce(&RwTxn) -> Result<Res, Err>) + Send + 'static,
+		Job: (FnOnce(&RwTxn<'_>) -> Result<Res, Err>) + Send + 'static,
 		Err: Send + 'static,
 	{
 		let _lock = self.write_sema.acquire().await.unwrap();
